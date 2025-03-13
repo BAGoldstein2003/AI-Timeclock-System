@@ -1,0 +1,4 @@
+Please complete the following instructions to test the CSV work schedule file in this folder:
+
+1. run the streamlit app and create a user
+2. upload the CSV file to the View/Upload Schedule page's input
