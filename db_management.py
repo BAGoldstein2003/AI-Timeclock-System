@@ -40,6 +40,7 @@ def create_userdb():
     ''')
     conn.commit()
 
+#converts the csv file to database entries while checking for duplicates
 def csv_to_db(csvfile):
     schedule_df = pd.read_csv(csvfile)
     reqColumns = {"name", "date", "start_time", "end_time"}
