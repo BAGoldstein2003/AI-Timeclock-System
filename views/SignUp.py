@@ -20,14 +20,15 @@ with st.form(key = "signupForm"):
 
     #process image to store in image DB
     if regPic:
-        image_bytes = regPic.getvalue()
-        detection = detected(image_bytes)
-        if detection:
-            st.session_state.photo_taken = True
-            st.success("Face successfully found in image")
-        else:
-            st.session_state.photo_taken = False
-            st.error("No face detected in image, Clear photo and try again")
+        with st.spinner("Detecting face..."):
+            image_bytes = regPic.getvalue()
+            detection = detected(image_bytes)
+            if detection:
+                st.session_state.photo_taken = True
+                st.success("Face successfully found in image")
+            else:
+                st.session_state.photo_taken = False
+                st.error("No face detected in image, Clear photo and try again")
 
     #center the submit button
     col1, col2, col3, col4, col5 = st.columns(5)
@@ -48,14 +49,15 @@ with st.form(key = "signupForm"):
         elif name != "" and password != "" and st.session_state.photo_taken is True:
             if (userType == "Manager"):
                 adminPass = st.text_input("Enter the Manager Password", type = 'password')
-                if adminPass == "admin123":
+                currentPass = getAdminPass()
+                if adminPass == currentPass:
                     if isUnique(name):
                         st.session_state.logged_in = True
                         st.session_state.name = name
                         st.session_state.userType = userType
                         add_user(name, password, userType, image_bytes)
                         st.success("Account Successfully Created!")
-                        time.sleep(1.5)
+                        time.sleep(1)
                         st.rerun() 
                     else:
                         st.error("Sorry, this name already exists!")
@@ -68,7 +70,7 @@ with st.form(key = "signupForm"):
                     st.session_state.userType = userType
                     add_user(name, password, userType, image_bytes)
                     st.success("Account Successfully Created!")
-                    time.sleep(1.5)
+                    time.sleep(1)
                     st.rerun() 
                 else:
                     st.error("Sorry, this name already exists!")

@@ -1,4 +1,11 @@
 import streamlit as st
+from db_management import pathExists, setAdminPass
+
+
+st.set_page_config(
+    layout="wide"
+)
+
 
 #initialize states
 if ("logged_in" not in st.session_state):
@@ -16,7 +23,7 @@ homePage = st.Page(
 clockInPage = st.Page(
     page= "views/ClockIn.py",
     title= "Clock-In",
-    icon=":material/hourglass_top:"
+    icon=":material/hourglass_top:",
 )
 
 clockOutPage = st.Page(
@@ -43,6 +50,14 @@ schedulePage = st.Page(
     icon = ":material/schedule:"
 )
 
+settingsPage = st.Page(
+    page= "views/Settings.py",
+    title= "Settings",
+    icon = ":material/settings:"
+)
+
+
+
 #navbar setup
 if (st.session_state["logged_in"] == True):
     if (st.session_state["userType"] == "Employee"):
@@ -59,7 +74,8 @@ if (st.session_state["logged_in"] == True):
                 "Home" : [homePage],
                 "Account Management" : [logInPage, signUpPage],
                 "Time Card" : [clockInPage, clockOutPage],
-                "Schedule" : [schedulePage]
+                "Schedule" : [schedulePage],
+                "Settings" : [settingsPage]
             }
         )
 else:
@@ -70,4 +86,9 @@ else:
         }
     )
 
+#create an env file containing the global admin pass if none exists
+if not pathExists():
+    setAdminPass()
+
+#runs the app
 pg.run()

@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
 import sqlite3
-from db_management import csv_to_db, shifts_to_db, get_all_employee_names, db_to_df
+from db_management import csv_to_db, shifts_to_db, get_all_names, db_to_df
 from datetime import datetime
+import time
+
 
 #initialize shift states
 if "shifts" not in st.session_state:
@@ -11,13 +13,7 @@ if "shifts" not in st.session_state:
     st.session_state.submitted_shifts = []
 
 #function for submitting shifts
-def submit_shifts():
-    st.session_state.input_changed = False
-    st.session_state.submitted_shifts = st.session_state.shifts
-    if (shifts_to_db(st.session_state.submitted_shifts)):
-        st.success("Shifts submitted successfully!")
-    else:
-        st.error("Error submitting shifts: duplicate shifts found")
+
         
 
 def add_shift():
@@ -28,8 +24,8 @@ def add_shift():
 #static UI elements
 st.title("Manage Schedule")
 st.write("### Current Schedule:")
-st.dataframe(db_to_df())
-maincol1, maincol2 = st.columns(2)
+st.dataframe(db_to_df(), hide_index = True)
+maincol1, maincol2 = st.columns(2, border = True)
 with maincol1:
     st.write("### Import a Schedule File:")
     st.write("Please upload a CSV file with the following columns:")
@@ -57,12 +53,11 @@ with maincol2:
     st.write("")
 
     for i, shift in enumerate(st.session_state.shifts):
-        with st.container():
+        with st.container(border = True):
             st.write(f"### Shift {i+1}")
-            formcol1, formcol2, formcol3, formcol4= st.columns(4)
-            
+            formcol1, formcol2, formcol3, formcol4= st.columns(4, border = True)
             with formcol1:
-                shift["name"] = st.selectbox(f"Name {i+1}", get_all_employee_names(), key=f"Name_{i}")
+                shift["name"] = st.selectbox(f"Name {i+1}", get_all_names(), key=f"Name_{i}")
             with formcol2:
                 shift["date"] = st.date_input(f"Date {i+1}", key=f"date_{i}", min_value=datetime.today().date())
             with formcol3:
@@ -78,10 +73,30 @@ with maincol2:
 
     with col2:
         if st.button("Delete recent Shift"):
-            st.session_state.shifts.pop()
+            if (len(st.session_state.shifts) > 0):
+                st.session_state.shifts.pop()
+            else:
+                st.error("You can't delete non-existent shifts!")
+                time.sleep(1)
             st.rerun()
 
-    st.button("Submit Shifts", on_click=submit_shifts)
+
+
+
+    submitManual = st.button("Submit Shifts")
+
+    def submit_shifts():
+        st.session_state.input_changed = False
+        st.session_state.submitted_shifts = st.session_state.shifts
+        if (shifts_to_db(st.session_state.submitted_shifts)):
+            st.success("Shifts submitted successfully!")
+            st.rerun()
+        else:
+            st.error("Error submitting shifts: duplicate shifts found")
+    
+    if submitManual:
+        submit_shifts()
+    
 
 st.write("")
 

@@ -1,6 +1,9 @@
 import sqlite3
 import bcrypt as bc
 import pandas as pd
+from dotenv import load_dotenv
+import os
+from pathlib import Path
 
 class User:
     def __init__(self, name, userType, password, image):
@@ -149,10 +152,10 @@ def db_to_df():
 
 
 #returns all names in the user table
-def get_all_employee_names():
+def get_all_names():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT name FROM users WHERE userType = "Employee"')
+    cursor.execute('SELECT name FROM users')
     users = cursor.fetchall()
     conn.close()
     return [user[0] for user in users]
@@ -163,7 +166,7 @@ def get_photo(uname):
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM users WHERE name = ?', (uname,))
     user = cursor.fetchone()
-    img = user[3]
+    img = user[4]
     return img
 
 def isUnique(name):
@@ -174,3 +177,24 @@ def isUnique(name):
         return False
     else:
         return True
+    
+#env file functions
+def pathExists():
+    folder = Path("secrets")
+    file = folder / ".env"
+    if not file.exists():
+        return False
+    return True
+
+def setAdminPass(pw="admin123"):
+    folder = Path("secrets")
+    file = folder / ".env"
+    content = f"ADMIN_PASSWORD={pw}"
+    
+    with open(file, "w") as f:
+        f.write(content)
+
+def getAdminPass():
+    load_dotenv("secrets/.env")
+    pw = os.getenv("ADMIN_PASSWORD")
+    return pw

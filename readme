@@ -5,3 +5,8 @@ To run the app (windows):
 3. enter: streamlit run app.py
 
 admin default password: admin123
+*TO CHANGE ADMIN PASSWORD, MODIFY THE .env FILE LOCATED IN 'secrets' FOLDER AND RESTART THE SERVER*
+
+*OR*
+
+*LOG IN AS MANAGER, AND CHANGE THE PASSWORD IN SETTINGS PAGE*
