@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import sqlite3
-from db_management import csv_to_db, shifts_to_db, get_all_names, db_to_df
+from db_management import csv_to_db, shifts_to_db, get_all_employee_names, db_to_df
 from datetime import datetime
 
 #initialize shift states
@@ -62,7 +62,7 @@ with maincol2:
             formcol1, formcol2, formcol3, formcol4= st.columns(4)
             
             with formcol1:
-                shift["name"] = st.selectbox(f"Name {i+1}", get_all_names(), key=f"Name_{i}")
+                shift["name"] = st.selectbox(f"Name {i+1}", get_all_employee_names(), key=f"Name_{i}")
             with formcol2:
                 shift["date"] = st.date_input(f"Date {i+1}", key=f"date_{i}", min_value=datetime.today().date())
             with formcol3:

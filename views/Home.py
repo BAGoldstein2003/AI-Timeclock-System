@@ -12,6 +12,7 @@ if "clocked_out" not in st.session_state:
     st.session_state["clocked_out"] = False
 if "clock_time" not in st.session_state:
     st.session_state["clock_time"] = time.time()
+print(st.session_state['userType'])
 
 st.title("Facial Recognition Timeclock ⏰")
 if (st.session_state["logged_in"] == True):

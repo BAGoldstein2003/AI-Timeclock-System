@@ -1,6 +1,7 @@
 import streamlit as st
 from db_management import *
 from imageProcessing import *
+import time
 
 #Create database if none
 create_userdb()
@@ -10,12 +11,12 @@ with st.form(key = "signupForm"):
 
     #signup form contents
     name = st.text_input("Full Name").lower()
+    userType = st.selectbox("User Type", ["Employee", "Manager"])
     password = st.text_input("Password", type = 'password')
     pConfirm = st.text_input("Re-enter Password", type = 'password')
-    if "photo_taken" not in st.session_state:
-        detection = False
-        st.session_state.photo_taken = False
     regPic = st.camera_input("Take a picture of your face for facial recognition")
+    st.session_state.photo_taken = False
+    
 
     #process image to store in image DB
     if regPic:
@@ -27,8 +28,11 @@ with st.form(key = "signupForm"):
         else:
             st.session_state.photo_taken = False
             st.error("No face detected in image, Clear photo and try again")
-            
-    submit = st.form_submit_button("Sign-up", icon = "🚀")
+
+    #center the submit button
+    col1, col2, col3, col4, col5 = st.columns(5)
+    with col3:
+        submit = st.form_submit_button("Sign-up", icon = "🚀")
 
             
     #when submit clicked
@@ -37,14 +41,37 @@ with st.form(key = "signupForm"):
             st.error("Please enter your full name and a password!")
         if password != pConfirm:
             st.error("Passwords do not match!")
-        #if criteria is met, submit form
-        elif name is not "" and password is not "" and st.session_state.photo_taken is True:
-            if isUnique(name):
-                st.session_state.logged_in = True
-                st.session_state.name = name
-                add_user(name, password, image_bytes)
-                st.success("Account Successfully Created!")
-                st.rerun()  
+        if st.session_state.photo_taken == False:
+            st.error("Please take a picture of your face for facial recognition!")
+
+        #if criteria is met, check if user is employee or a manager
+        elif name != "" and password != "" and st.session_state.photo_taken is True:
+            if (userType == "Manager"):
+                adminPass = st.text_input("Enter the Manager Password", type = 'password')
+                if adminPass == "admin123":
+                    if isUnique(name):
+                        st.session_state.logged_in = True
+                        st.session_state.name = name
+                        st.session_state.userType = userType
+                        add_user(name, password, userType, image_bytes)
+                        st.success("Account Successfully Created!")
+                        time.sleep(1.5)
+                        st.rerun() 
+                    else:
+                        st.error("Sorry, this name already exists!")
+                else:
+                    st.error("Incorrect Manager Password!")
             else:
-                st.error("Sorry, this name already exists!")
+                if isUnique(name):
+                    st.session_state.logged_in = True
+                    st.session_state.name = name
+                    st.session_state.userType = userType
+                    add_user(name, password, userType, image_bytes)
+                    st.success("Account Successfully Created!")
+                    time.sleep(1.5)
+                    st.rerun() 
+                else:
+                    st.error("Sorry, this name already exists!")
+        
+            
                     

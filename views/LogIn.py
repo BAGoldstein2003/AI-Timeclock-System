@@ -16,7 +16,9 @@ else:
     with st.form(key = "loginForm"):
         name = st.text_input("Full Name")
         password = st.text_input("Password", type = 'password')
-        loginSubmit = st.form_submit_button("Log in", icon = ":material/login:")
+        col1, col2, col3, col4, col5 = st.columns(5)
+        with col3:    
+            loginSubmit = st.form_submit_button("Log in", icon = ":material/login:")
         if loginSubmit:
             if verify_user(name.lower(), password):
                  st.session_state["logged_in"] = True

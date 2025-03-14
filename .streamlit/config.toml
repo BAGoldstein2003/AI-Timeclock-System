@@ -1,2 +1,4 @@
 [theme]
-primaryColor = "#6ACCCB"
+primaryColor = "#783930"
+backgroundColor = "#D2B48C"
+font = "serif"

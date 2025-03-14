@@ -1,8 +1,11 @@
 import streamlit as st
 
+#initialize states
 if ("logged_in" not in st.session_state):
     st.session_state["logged_in"] = False
+    st.session_state["userType"] = ""
 
+#page setup
 homePage = st.Page(
     page= "views/Home.py",
     title="Home",
@@ -40,15 +43,25 @@ schedulePage = st.Page(
     icon = ":material/schedule:"
 )
 
-
+#navbar setup
 if (st.session_state["logged_in"] == True):
-    pg = st.navigation(
+    if (st.session_state["userType"] == "Employee"):
+        pg = st.navigation(
         {
             "Home" : [homePage],
             "Account Management" : [logInPage, signUpPage],
-            "Time Card" : [clockInPage, clockOutPage, schedulePage]
+            "Time Card" : [clockInPage, clockOutPage]
         }
     )
+    else:
+        pg = st.navigation(
+            {
+                "Home" : [homePage],
+                "Account Management" : [logInPage, signUpPage],
+                "Time Card" : [clockInPage, clockOutPage],
+                "Schedule" : [schedulePage]
+            }
+        )
 else:
     pg = st.navigation(
         {
@@ -58,5 +71,3 @@ else:
     )
 
 pg.run()
-
-

@@ -3,8 +3,9 @@ import bcrypt as bc
 import pandas as pd
 
 class User:
-    def __init__(self, name, password, image):
+    def __init__(self, name, userType, password, image):
         self.name = name
+        self.userType = userType
         self.password = password
         self.image = image
     
@@ -13,8 +14,8 @@ class User:
         conn = sqlite3.connect('users.db')
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO users (name, password, image) VALUES (?, ?, ?)
-        ''', (self.name, hashPw, self.image))
+            INSERT INTO users (name, userType, password, image) VALUES (?, ?, ?, ?)
+        ''', (self.name, self.userType, hashPw, self.image))
         conn.commit()
 
 class Work:
@@ -33,6 +34,7 @@ def create_userdb():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL UNIQUE,
+            userType TEXT NOT NULL,
             password TEXT NOT NULL,
             image BLOB
                 
@@ -40,7 +42,22 @@ def create_userdb():
     ''')
     conn.commit()
 
-#converts the csv file to database entries while checking for duplicates
+def add_user(uname, userType, pword, img):
+    newUser = User(uname, userType, pword, img)
+    newUser.save()
+
+def verify_user(name, pword):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM users WHERE name = ?', (name,))
+    user = cursor.fetchone()
+    if user:
+        stored_hash = user[2]
+        if bc.checkpw(pword.encode('utf-8'), stored_hash):
+            return True
+    return False
+
+
 def csv_to_db(csvfile):
     schedule_df = pd.read_csv(csvfile)
     reqColumns = {"name", "date", "start_time", "end_time"}
@@ -131,29 +148,11 @@ def db_to_df():
     return pd.DataFrame(rows, columns=['id','name', 'date', 'start_time', 'end_time'])
 
 
-    
-
-def add_user(uname, pword, img):
-    newUser = User(uname, pword, img)
-    newUser.save()
-
-
-def verify_user(name, pword):
-    conn = sqlite3.connect('users.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE name = ?', (name,))
-    user = cursor.fetchone()
-    if user:
-        stored_hash = user[2]
-        if bc.checkpw(pword.encode('utf-8'), stored_hash):
-            return True
-    return False
-
 #returns all names in the user table
-def get_all_names():
+def get_all_employee_names():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT name FROM users')
+    cursor.execute('SELECT name FROM users WHERE userType = "Employee"')
     users = cursor.fetchall()
     conn.close()
     return [user[0] for user in users]
