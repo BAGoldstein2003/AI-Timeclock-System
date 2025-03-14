@@ -2,6 +2,7 @@ import streamlit as st
 from db_management import *
 from imageProcessing import *
 import time
+from streamlit_extras.let_it_rain import rain
 
 #Create database if none
 create_userdb()
@@ -52,6 +53,10 @@ with st.form(key = "signupForm"):
                 currentPass = getAdminPass()
                 if adminPass == currentPass:
                     if isUnique(name):
+                        rain(
+                            emoji="✔️",
+                            animation_length = 5
+                        )
                         st.session_state.logged_in = True
                         st.session_state.name = name
                         st.session_state.userType = userType
@@ -65,12 +70,16 @@ with st.form(key = "signupForm"):
                     st.error("Incorrect Manager Password!")
             else:
                 if isUnique(name):
+                    rain(
+                            emoji="✔️",
+                            falling_speed=2
+                        )
                     st.session_state.logged_in = True
                     st.session_state.name = name
                     st.session_state.userType = userType
                     add_user(name, password, userType, image_bytes)
                     st.success("Account Successfully Created!")
-                    time.sleep(1)
+                    time.sleep(5)
                     st.rerun() 
                 else:
                     st.error("Sorry, this name already exists!")
