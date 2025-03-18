@@ -3,16 +3,17 @@ from pathlib import Path
 import os
 import streamlit as st
 import time
-from db_management import getAdminPass, setAdminPass
+from db_management import *
 
 
 st.title("Settings")
-
 with st.form(key="Settings Form"):
     col1, col2, col3, col4, col5 = st.columns(5)
     with col3:
-        passVerify = st.text_input("Old Admin Password", type="password")
-        newPass = st.text_input("New Admin Password")
+        
+        st.write("### Change Manager Password")
+        passVerify = st.text_input("Old Manager Password", type="password")
+        newPass = st.text_input("New Manager Password")
         submit = st.form_submit_button("Submit Changes", icon="🔒")
         if submit:
             if passVerify == getAdminPass():

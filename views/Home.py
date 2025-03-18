@@ -1,4 +1,5 @@
 import streamlit as st
+from datetime import datetime
 import time
 
 #initialize states
@@ -11,7 +12,7 @@ if "clocked_in" not in st.session_state:
 if "clocked_out" not in st.session_state:
     st.session_state["clocked_out"] = False
 if "clock_time" not in st.session_state:
-    st.session_state["clock_time"] = time.time()
+    st.session_state["clock_time"] = None
 
 #Home UI
 st.title("Facial Recognition Timeclock ⏰")
@@ -28,14 +29,13 @@ else:
     st.write("Welcome! To create an account or log in, please follow the sidebar on the left!")
 
 if st.session_state["clocked_in"]:
-    clockTime = st.session_state.clock_time
+    clockTime = st.session_state["clockin_datetime"]
     clockDisplay = st.empty()
     while True:
-        currTime = time.time()
-        elapsedTime = currTime - clockTime
-        elapsedHours = int(elapsedTime // 3600)
-        elapsedMinutes = int((elapsedTime % 3600) // 60)
-        elapsedSeconds = int(elapsedTime % 60)
-        elapsedToStr = f"{elapsedHours:02}:{elapsedMinutes:02}:{elapsedSeconds:02}"
-        clockDisplay.text(f"Elapsed time clocked in: {elapsedToStr}")
+        elapsedTime =  datetime.now() - clockTime
+        #elapsedHours = int(elapsedTime // 3600)
+        #elapsedMinutes = int((elapsedTime % 3600) // 60)
+        #elapsedSeconds = int(elapsedTime % 60)
+        #elapsedToStr = f"{elapsedHours:02}:{elapsedMinutes:02}:{elapsedSeconds:02}"
+        clockDisplay.text(f"Elapsed time clocked in: {str(elapsedTime)[:-7]}")
         time.sleep(1)

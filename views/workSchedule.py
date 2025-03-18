@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import sqlite3
-from db_management import csv_to_db, shifts_to_db, get_all_names, db_to_df
+from db_management import *
 from datetime import datetime
 import time
 
@@ -20,11 +20,28 @@ def add_shift():
     st.session_state.shifts.append({"name": "", "date": "", "start_time": "", "end_time": ""})
     st.rerun()
 
+def delete_shifts():
+    delButton = st.button("Delete Already-Made Shifts")
+    if delButton:
+        with st.form():
+            select = st.selectbox(label="Select a shift to delete")
+
+def submit_shifts():
+    print(st.session_state.submitted_shifts)
+    st.session_state.submitted_shifts = st.session_state.shifts
+    submitted = shifts_to_db(st.session_state.submitted_shifts)
+    print(submitted)
+    if (submitted):
+        st.success("Shifts submitted successfully!")
+        time.sleep(1)
+        st.rerun()
+    else:
+        st.error("Error submitting shifts: duplicate shifts found")
 
 #static UI elements
 st.title("Manage Schedule")
 st.write("### Current Schedule:")
-st.dataframe(db_to_df(), hide_index = True)
+st.dataframe(scheduledb_to_df(), hide_index = True)
 maincol1, maincol2 = st.columns(2, border = True)
 with maincol1:
     st.write("### Import a Schedule File:")
@@ -40,10 +57,11 @@ with maincol1:
             schedule_df['date'] = pd.to_datetime(schedule_df['date'])
             schedule_df['start_time'] = pd.to_datetime(schedule_df['start_time'], format='%H:%M').dt.time
             schedule_df['end_time'] = pd.to_datetime(schedule_df['end_time'], format='%H:%M').dt.time
-            schedule_df = schedule_df.sort_values(by=['name', 'date', 'start_time'])
+            schedule_df = schedule_df.sort_values(by=['date', 'start_time', 'name'])
 
             st.write("Uploaded Schedule:")
             st.dataframe(schedule_df)
+            st.success("Successfully entered shifts!")
         else:
             st.error("Error: Invalid CSV file OR duplicate shifts found")
 
@@ -84,19 +102,6 @@ with maincol2:
 
 
     submitManual = st.button("Submit Shifts")
-
-    def submit_shifts():
-        st.session_state.input_changed = False
-        st.session_state.submitted_shifts = st.session_state.shifts
-        if (shifts_to_db(st.session_state.submitted_shifts)):
-            st.success("Shifts submitted successfully!")
-            st.rerun()
-        else:
-            st.error("Error submitting shifts: duplicate shifts found")
-    
     if submitManual:
         submit_shifts()
-    
-
-st.write("")
 

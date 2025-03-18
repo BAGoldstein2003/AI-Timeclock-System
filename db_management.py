@@ -4,6 +4,8 @@ import pandas as pd
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+import streamlit as st
+from datetime import datetime
 
 class User:
     def __init__(self, name, userType, password, image):
@@ -22,9 +24,28 @@ class User:
         conn.commit()
 
 class Work:
-    def __init__(self, startTime, endTime):
+    def __init__(self, name, startTime, endTime):
+        self.name = name
         self.startTime = startTime
         self.endTime = endTime
+    
+    def save(self):
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS shifts (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                startTime TEXT NOT NULL,
+                endTime TEXT NOT NULL
+            )
+        ''')
+        cursor.execute('''
+            INSERT INTO shifts (name, startTime, endTime) VALUES (?, ?, ?)
+        ''',  (self.name, self.startTime, self.endTime)
+        )
+        conn.commit()
+
 
 
 #Creates User Database with user table
@@ -45,6 +66,21 @@ def create_userdb():
     ''')
     conn.commit()
 
+def create_shiftsdb():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+
+    # Create users table if it doesn't exist
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS shifts (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            startTime TEXT NOT NULL,
+            endTime TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+
 def add_user(uname, userType, pword, img):
     newUser = User(uname, userType, pword, img)
     newUser.save()
@@ -55,7 +91,7 @@ def verify_user(name, pword):
     cursor.execute('SELECT * FROM users WHERE name = ?', (name,))
     user = cursor.fetchone()
     if user:
-        stored_hash = user[2]
+        stored_hash = user[3]
         if bc.checkpw(pword.encode('utf-8'), stored_hash):
             return True
     return False
@@ -75,19 +111,19 @@ def csv_to_db(csvfile):
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 date TEXT NOT NULL,
-                start_time TEXT NOT NULL,
-                end_time TEXT NOT NULL,
+                startTime TEXT NOT NULL,
+                endTime TEXT NOT NULL,
                 FOREIGN KEY (name) REFERENCES users (name)
             )
         ''')
         # Insert the schedule data into the table
         for _, row in schedule_df.iterrows():
             cursor.execute('''
-            SELECT COUNT(*) FROM schedule WHERE name = ? AND date = ? AND start_time = ? AND end_time = ?
+            SELECT COUNT(*) FROM schedule WHERE name = ? AND date = ? AND startTime = ? AND endTime = ?
         ''', (row['name'], row['date'], row['start_time'], row['end_time']))
             if cursor.fetchone()[0] == 0:
                 cursor.execute('''
-                    INSERT INTO schedule (name, date, start_time, end_time) VALUES (?, ?, ?, ?)
+                    INSERT INTO schedule (name, date, startTime, endTime) VALUES (?, ?, ?, ?)
                 ''', (row['name'], row['date'], row['start_time'], row['end_time']))
             else:
                 conn.close()
@@ -118,11 +154,12 @@ def shifts_to_db(submitted_shifts):
         #check for any duplicate shifts
         cursor.execute('''
             SELECT COUNT(*) FROM schedule WHERE name = ? AND date = ? AND start_time = ? AND end_time = ?
-        ''', (shift['name'], str(shift['date']), str(shift['start_time'])[:-3], str(shift['end_time'])[:-3]))
+        ''', (shift['name'], str(shift['date']), str(shift['start_time']), str(shift['end_time'])))
         if cursor.fetchone()[0] == 0:
             cursor.execute('''
                 INSERT INTO schedule (name, date, start_time, end_time) VALUES (?, ?, ?, ?)
-            ''', (shift['name'], str(shift['date']), str(shift['start_time'])[:-3], str(shift['end_time'])[:-3]))
+            ''', (shift['name'], str(shift['date']), str(shift['start_time']), str(shift['end_time'])))
+            
         else:
             conn.close()
             return False
@@ -132,7 +169,7 @@ def shifts_to_db(submitted_shifts):
     return True
 
 #converts schedule database to a pandas dataframe for display
-def db_to_df():
+def scheduledb_to_df():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     cursor.execute('''
@@ -149,6 +186,29 @@ def db_to_df():
     rows = cursor.fetchall()
     conn.close()
     return pd.DataFrame(rows, columns=['id','name', 'date', 'start_time', 'end_time'])
+
+def shiftsdb_to_table():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS shifts (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            startTime TEXT NOT NULL,
+            endTime TEXT NOT NULL
+        )
+    ''')
+    cursor.execute('SELECT * FROM shifts WHERE name = ?', (st.session_state["name"],))
+    rows = cursor.fetchall()
+    conn.close()
+    for i, shift in enumerate(rows):
+        with st.container(border = True):
+            st.write(f"### Shift {i+1}:")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write(f"Start Time: {shift[2]}")
+            with col2:
+                st.write(f"End Time: {shift[3]}")
 
 
 #returns all names in the user table

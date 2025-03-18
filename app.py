@@ -1,6 +1,9 @@
 import streamlit as st
-from db_management import pathExists, setAdminPass
+from db_management import *
 
+#create databases
+create_userdb()
+create_shiftsdb()
 
 st.set_page_config(
     layout="wide"
@@ -56,33 +59,43 @@ settingsPage = st.Page(
     icon = ":material/settings:"
 )
 
+clockHistoryPage = st.Page(
+    page="views/ClockHistory.py",
+    title= "Clock History",
+    icon= ":material/history:"
+)
+
 
 
 #navbar setup
 if (st.session_state["logged_in"] == True):
     if (st.session_state["userType"] == "Employee"):
+        #if user is an employee
         pg = st.navigation(
         {
             "Home" : [homePage],
             "Account Management" : [logInPage, signUpPage],
-            "Time Card" : [clockInPage, clockOutPage]
+            "Time Card" : [clockInPage, clockOutPage, clockHistoryPage]
         }
     )
     else:
+        #if user is a manager
         pg = st.navigation(
             {
                 "Home" : [homePage],
                 "Account Management" : [logInPage, signUpPage],
-                "Time Card" : [clockInPage, clockOutPage],
+                "Time Card" : [clockInPage, clockOutPage, clockHistoryPage],
                 "Schedule" : [schedulePage],
                 "Settings" : [settingsPage]
             }
         )
 else:
+    #if user is not logged in
     pg = st.navigation(
         {
             "Home" : [homePage],
-            "Account Management" : [logInPage, signUpPage]
+            "Account Management" : [logInPage, signUpPage],
+            "Time Card" : [clockHistoryPage]
         }
     )
 

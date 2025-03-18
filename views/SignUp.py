@@ -7,6 +7,7 @@ from streamlit_extras.let_it_rain import rain
 #Create database if none
 create_userdb()
 
+st.title("Sign Up")
 st.write("Please enter your desired credentials and click 'sign-up'")
 with st.form(key = "signupForm"):
 
@@ -60,7 +61,7 @@ with st.form(key = "signupForm"):
                         st.session_state.logged_in = True
                         st.session_state.name = name
                         st.session_state.userType = userType
-                        add_user(name, password, userType, image_bytes)
+                        add_user(name, userType, password, image_bytes)
                         st.success("Account Successfully Created!")
                         time.sleep(1)
                         st.rerun() 
@@ -77,9 +78,9 @@ with st.form(key = "signupForm"):
                     st.session_state.logged_in = True
                     st.session_state.name = name
                     st.session_state.userType = userType
-                    add_user(name, password, userType, image_bytes)
+                    add_user(name, userType, password, image_bytes)
                     st.success("Account Successfully Created!")
-                    time.sleep(5)
+                    time.sleep(3)
                     st.rerun() 
                 else:
                     st.error("Sorry, this name already exists!")
