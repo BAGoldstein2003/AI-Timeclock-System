@@ -1,0 +1,12 @@
+To run the app (windows):
+
+1. In a command prompt, change current working directory to the source folder
+2. enter: pip install -r requirements.txt
+3. enter: streamlit run app.py
+
+admin default password: admin123
+*TO CHANGE ADMIN PASSWORD, MODIFY THE .env FILE LOCATED IN 'secrets' FOLDER AND RESTART THE SERVER*
+
+*OR*
+
+*LOG IN AS MANAGER, AND CHANGE THE PASSWORD IN SETTINGS PAGE*
