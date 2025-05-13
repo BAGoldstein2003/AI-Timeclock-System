@@ -15,4 +15,3 @@ apt-get update && apt-get install -y \
 
 # Install Python dependencies
 pip install -r requirements.txt
-streamlit run app.py
