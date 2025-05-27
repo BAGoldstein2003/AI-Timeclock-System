@@ -1,4 +1,7 @@
+
 To run the app (windows):
+
+**MUST HAVE PYTHON VERSION < 3.11 INSTALLED**
 
 1. In a command prompt, change current working directory to the source folder
 2. enter: pip install -r requirements.txt
